@@ -1,1 +1,1 @@
-# tp_ADMM-et-tp_algo_projte
+# projet tp optimisation convexe et programmation non linéaire.
