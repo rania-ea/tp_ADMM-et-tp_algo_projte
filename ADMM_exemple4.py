@@ -94,3 +94,15 @@ plt.title("Commparaison des deux estimateurs")
 plt.legend()
 plt.grid(True)
 plt.show()
+
+normb = np.linalg.norm(b)
+
+normbestimoindrecarré = np.linalg.norm(b-b_esti)
+normbestimoindrecarréord1 = np.linalg.norm(b-b_esti,ord=1)
+normbestiADMM= np.linalg.norm(b-b_esti_ADMM)
+normbestiADMMord1= np.linalg.norm(b-b_esti_ADMM,ord=1)
+print(normbestiADMM,'norme 2 de la différence entre estimateur ADMM et la valeur réel' )
+print(normbestimoindrecarré,'norme 2 de la différence entre estimateur moidre carré et la valeur réel' )
+print(normbestiADMMord1,'norme 1 de la différence entre estimateur ADMM et la valeur réel' )
+print(normbestimoindrecarréord1,'norme 1 de la différence entre estimateur moindre carré et la valeur réel' )
+
