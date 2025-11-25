@@ -1,0 +1,69 @@
+
+#ALGORITEME PROGRAMMATION QUADRATIQUE SEQUENTILLE LOCALE
+import numpy as np 
+# INITIALISATION 
+k = 0 
+epsilon = 10**(-5)
+x=np.array([0,0])
+lamda=np.array([0,0])
+
+
+def f(x): # fonction cout
+ return x[0]+ x[1]
+
+def h(x): # definition des contrainte
+    return x[0]**2 + (x[1]-1)**2 -1
+
+# on pose x**0
+x_k = np.array(np.transpose([1,-1]))
+lamda_k = np.array([1])# choisie de magniere arbitraire
+#while k > 0 :
+# 1 - calculer grad f , grad h , ... et lagrangien au point x_k
+delta = 10**(-3) # pas (petit)
+# calcul gradf
+def gradf1(x_k):
+    return ( f(np.array([x_k[0] + delta, x_k[1]])) - f(x_k) )/ delta
+def gradf2(x_k):
+    return ( f(np.array([x_k[0] , x_k[1] +delta])) - f(x_k) ) / delta
+def gradf(x_k):
+    return np.array([gradf1(x_k),gradf2(x_k)])
+
+#calcul gradh
+def gradh1(x_k):
+    return ( h(np.array([x_k[0] + delta, x_k[1]])) - h(x_k) )/ delta 
+def gradh2(x_k):
+    return ( h(np.array([x_k[0] , x_k[1] +delta])) - h(x_k) ) / delta
+def gradh(x_k):
+    return np.array( [gradh1(x_k),gradh2(x_k)])
+
+# calcul derivré partielle seconde de xx de f
+def gradf11(x_k):
+    return ( gradf1(np.array([x_k[0] + delta, x_k[1]])) - gradf1(x_k) )/ delta
+def gradf12(x_k):
+    return ( gradf1(np.array([x_k[0] , x_k[1] +delta])) - gradf1(x_k) ) / delta
+def gradf22(x_k):
+    return ( gradf2(np.array([x_k[0] , x_k[1] +delta])) - gradf2(x_k) ) / delta
+def Hf(x_k):
+    return np.array([[gradf11(x_k),gradf12(x_k)],[gradf12(x_k),gradf22(x_k)]])
+
+# calcul derivré partielle seconde de xx de h
+def gradh11(x_k):
+    return ( gradh1(np.array([x_k[0] + delta, x_k[1]])) - gradh1(x_k) )/ delta
+def gradh12(x_k):
+    return ( gradh1(np.array([x_k[0] , x_k[1] +delta])) - gradh1(x_k) ) / delta
+def gradh22(x_k):
+    return  (gradh2(np.array([x_k[0] , x_k[1] +delta])) - gradh2(x_k) ) / delta
+def Hh(x_k):
+    return np.array([[gradh11(x_k),gradh12(x_k)],[gradh12(x_k),gradh22(x_k)]])
+
+# calcul du lagrangien au point x_k,lamda_k
+L= Hf(x_k) + (lamda_k * Hh(x_k))
+print(L)
+print(np.transpose(gradh(x_k)))
+# 2 - détermination (d_k,lamda_bar_k) du point selle du pb quadratique
+# on posons dans un premier tant que L soit definie positif 
+# Ainsi comme il s'agit d'un probleme quadratique et que l'on travail sur des fonction convexe l'on a les hypothese du point selle :
+A = np.array([[ L, np.transpose(gradh(x_k))],[gradh(x_k),0]])
+X = np.array([d_k,lamda_k]) 
+print(X)
+
