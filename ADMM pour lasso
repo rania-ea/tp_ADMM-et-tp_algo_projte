@@ -7,29 +7,36 @@ from scipy.sparse import diags
 from scipy.linalg import  cho_solve, cho_factor
 
 
-# Paramètres
-m = 50   # nombre d'individus
-n = 100  # nombre d'attributs
-p = 100 / (m * n)  # densité de la matrice A
+# ParamÃ¨tres
+#m = 50   # nombre d'individus
+#n = 100  # nombre d'attributs
+#p = 100 / (m * n)  # densitÃ© de la matrice A
 
-# Génération de x_0 : vecteur clairsemé de taille n
-x_0 = sprandn(n, 1, density=p, format='csr', dtype=float)
-print(x_0)
-x_0.data = np.random.randn(len(x_0.data))  # valeurs normales centrées réduites
+# GÃ©nÃ©ration de x_0 : vecteur clairsemÃ© de taille n
+#x_0 = sprandn(n, 1, density=p, format='csr', dtype=float)
+#print(x_0)
+#x_0.data = np.random.randn(len(x_0.data))  # valeurs normales centrÃ©es rÃ©duites
 
-# Matrice A de taille m x n avec colonnes normalisées
-A = np.random.randn(m, n)
-A = A @ np.diag(1 / np.sqrt(np.sum(A**2, axis=0)))  # normalisation des colonnes
+# Matrice A de taille m x n avec colonnes normalisÃ©es
+#A = np.random.randn(m, n)
+#A = A @ np.diag(1 / np.sqrt(np.sum(A**2, axis=0)))  # normalisation des colonnes
 
 # Calcul de b
-b = A @ x_0.toarray() + np.sqrt(0.001) * np.random.randn(m, 1)
+#b = A @ x_0.toarray() + np.sqrt(0.001) * np.random.randn(m, 1)
+
+
+
+# imoprtation 
+A = np.loadtxt("/home/local.isima.fr/raelayadi/Téléchargements/lasso_A50x100.dat")
+b = np.loadtxt("/home/local.isima.fr/raelayadi/Téléchargements/lasso_b50x1.dat")
+print(np.shape(A),np.shape(b))
 
 # Calcul de lambda_max et lambda
 lambda_max = np.linalg.norm(A.T @ b, ord=np.inf)
 lmbda = 0.1 * lambda_max
 
 #fonction sto 
-
+n=np.size(A[1,:])
 a = np.array(n)
 def sto(kappa,a):
  end = np.zeros(shape=np.size(a))
@@ -49,21 +56,24 @@ epsilon = 10**(-6)
 
 
 x_k = np.zeros(n)
-z_k = np.zeros(np.size(b))
-u_k = np.zeros(np.size(b))
+z_k = np.zeros(n)
+u_k = np.zeros(n)
 x= np.zeros(n) 
-z = np.zeros(np.size(b)) 
-u = np.zeros(np.size(b))
+z = np.zeros(n) 
+u = np.zeros(n)
 stop = 1
 norminfini=1
 k=0
 lg_A = np.shape(A)[1]
 A_r = ( np.transpose(A) @ A ) + (r * np.identity(lg_A))
 R, low = cho_factor(A_r)
-
+adssice = []
+x_k_liste = []
 while stop > epsilon and norminfini > 1e-10 and k < 5000:
+    
+    s = r*(z_k - u_k)
 
-    x_k = x = cho_solve((R, low),  np.transpose(A) @ b + r*(z_k - u_k))
+    x_k = x = cho_solve((R, low),  np.transpose(A) @ b + s)
 
     z_k = sto_efficace(lmbda/r,x_k  + u_k )
 
@@ -81,25 +91,34 @@ while stop > epsilon and norminfini > 1e-10 and k < 5000:
     u = u_k
     norminfini = la.norm(x-z)
     k= k+1
-    print(k,'k')
-    print(norminfini,'norminfini')
-    print(stop,'stop')
-    print (x_k,'x_k')
-    print (z_k,'z_k')
-    print (u_k,'u_k')
-#print (x_k)
+    adssice = np.append(adssice,k)
+    x_k_liste.append(x_k)
+    #print(k,'k')
+    #print(norminfini,'norminfini')
+    #print(stop,'stop')
+    #print (x_k,'x_k')
+    #print (z_k,'z_k')
+    #print (u_k,'u_k')
+print(np.shape(x_k),'x_k')
+print(np.shape(A),"A")
 #print (z_k)
 #print (u_k)
+print(np.size(adssice))
 
-
-t = np.array([-1,-0.75,-0.5,0,0.3,0.5,1])
-# on affiche la courbe de la fonction cout pour visualiser si on minimise bien la fonction 
+#t = np.array([-1,-0.75,-0.5,0,0.3,0.5,1])
+#Â on affiche la courbe de la fonction cout pour visualiser si on minimise bien la fonction 
 # fonction cout
 def cout(A,x,b,lmbda):
-   return 1/2 * la.norm(A@x - b)**2 + lmbda * la.norm(x)
-plt.plot(x_k,cout(A,x_k,b,lmbda),label='moindre valeur absolue')
+    return 1/2 * la.norm( np.dot(A, x)- b)**2 + lmbda * la.norm(x)
+
+# création de la liste des image de la fonction cout ( normalement autant element que adssice)
+im_cout = []
+
+for x_k in x_k_liste: 
+    im_cout= np.append(im_cout,cout(A,x_k.reshape(100,1),b,lmbda))
+
+plt.plot(adssice,im_cout,label='moindre valeur absolue')
 plt.legend()
 plt.title('fonction cout')
 plt.grid(True)
 plt.show()
-
