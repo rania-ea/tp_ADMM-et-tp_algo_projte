@@ -1,0 +1,76 @@
+#Méthode accélérée de Nesterov pour LASSO
+
+from numpy import linalg as la
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.sparse import rand as sprandn
+from scipy.sparse import diags
+from scipy.linalg import cho_solve, cho_factor
+
+def soft_thresholding(x,alpha):
+    return np.sign(x) * np.max(np.abs(x)-alpha, 0)
+
+# fonction cout
+def cout(A,x,b,lmbda):
+    return 1/2 * la.norm( np.dot(A, x)- b)**2 + lmbda * la.norm(x)
+
+# imoprtation 
+A = np.loadtxt("/home/local.isima.fr/raelayadi/Téléchargements/lasso_A50x100.dat")
+b = np.loadtxt("/home/local.isima.fr/raelayadi/Téléchargements/lasso_b50x1.dat")
+print(np.shape(A),np.shape(b))
+
+# Calcul de lambda_max et lambda
+lambda_max = np.linalg.norm(A.T @ b, ord=np.inf)
+lmbda = 0.1 * lambda_max
+
+d=100 # nbr de ligne 
+x_k = np.random.rand(d)
+
+x_kold = x_k # x_k-1
+
+# x_k 
+L= (np.linalg.norm(A,ord = 2))**2
+delta = 1 / L
+y_k = x_k
+z_k = y_k - delta * np.transpose(A) @ (A @ y_k -b)
+
+x_k = soft_thresholding(z_k,delta * lmbda)
+
+
+t_k =1
+
+
+
+k=0
+x_k_liste = []
+adssice = []
+while k < 5000:
+
+    z_k = y_k - delta * np.transpose(A) @ (A @ y_k -b)
+    x_knew = soft_thresholding(z_k,delta * lmbda)
+
+    if cout(A,x_knew,b,lmbda) > cout(A,x_k,b,lmbda):
+        t_k = 1
+        y_k = x_k
+    else:
+        t_knew = 1/2 * ( 1 + np.sqrt(1+ 4*(t_k)**2))
+        y_k = x_k + (t_k - 1)*(x_k -x_kold) / t_knew
+        t_k = t_knew
+    x_k = x_knew
+    x_kold = x_k
+    k=k+1
+    x_k_liste.append(x_k)
+    adssice = np.append(adssice,k)
+
+
+# création de la liste des image de la fonction cout ( normalement autant element que adssice)
+im_cout = []
+
+for x_k in x_k_liste: 
+    im_cout= np.append(im_cout,cout(A,x_k.reshape(d,1),b,lmbda))
+
+plt.plot(adssice,im_cout,label='moindre valeur absolue')
+plt.legend()
+plt.title('fonction cout')
+plt.grid(True)
+plt.show()
