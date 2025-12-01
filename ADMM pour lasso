@@ -3,32 +3,41 @@ from numpy import linalg as la
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.sparse import rand as sprandn
-from scipy.sparse import diags
+
 from scipy.linalg import  cho_solve, cho_factor
+import time 
 
+# Paramètres
 
-# ParamÃ¨tres
-#m = 50   # nombre d'individus
-#n = 100  # nombre d'attributs
-#p = 100 / (m * n)  # densitÃ© de la matrice A
+### example 3
+m = 50    # nombre d'individus
+n = 100   # nombre d'attributs
+p = 100 / (m * n)  # densité de la matrice A
 
-# GÃ©nÃ©ration de x_0 : vecteur clairsemÃ© de taille n
-#x_0 = sprandn(n, 1, density=p, format='csr', dtype=float)
-#print(x_0)
-#x_0.data = np.random.randn(len(x_0.data))  # valeurs normales centrÃ©es rÃ©duites
+# Génération de x_0 : vecteur clairsemé de taille n
+x_0 = sprandn(n, 1, density=p, format='csr', dtype=float)
+x_0.data = np.random.randn(len(x_0.data))  # valeurs normales centrées réduites
 
-# Matrice A de taille m x n avec colonnes normalisÃ©es
-#A = np.random.randn(m, n)
-#A = A @ np.diag(1 / np.sqrt(np.sum(A**2, axis=0)))  # normalisation des colonnes
+# Matrice A de taille m x n avec colonnes normalisées
+A = np.random.randn(m, n)
+A = A @ np.diag(1 / np.sqrt(np.sum(A**2, axis=0)))  # normalisation des colonnes
 
 # Calcul de b
-#b = A @ x_0.toarray() + np.sqrt(0.001) * np.random.randn(m, 1)
+b = (A @ x_0.toarray()).ravel() + np.sqrt(0.001) * np.random.randn(m)
 
 
 
 # imoprtation 
-A = np.loadtxt("/home/local.isima.fr/raelayadi/Téléchargements/lasso_A50x100.dat")
-b = np.loadtxt("/home/local.isima.fr/raelayadi/Téléchargements/lasso_b50x1.dat")
+
+### example 1
+#A = np.loadtxt("C:/Users/rania/Downloads/lasso_A50x100.dat")
+#b = np.loadtxt("C:/Users/rania/Downloads/lasso_b50x1.dat")
+
+### example 2
+#A = np.loadtxt("C:/Users/rania/Downloads/lasso_A1500x5000.dat")
+#b = np.loadtxt("C:/Users/rania/Downloads/lasso_b1500x1.dat")
+
+
 print(np.shape(A),np.shape(b))
 
 # Calcul de lambda_max et lambda
@@ -54,7 +63,7 @@ def sto_efficace(kappa,a):
 r = 0.1
 epsilon = 10**(-6)  
 
-
+start_time =time.time ()
 x_k = np.zeros(n)
 z_k = np.zeros(n)
 u_k = np.zeros(n)
@@ -99,13 +108,14 @@ while stop > epsilon and norminfini > 1e-10 and k < 5000:
     #print (x_k,'x_k')
     #print (z_k,'z_k')
     #print (u_k,'u_k')
-print(np.shape(x_k),'x_k')
-print(np.shape(A),"A")
+#print(np.shape(x_k),'x_k')
+#print(np.shape(A),"A")
+print(k,"nombre d'iteration")
 #print (z_k)
 #print (u_k)
-print(np.size(adssice))
+#print(np.size(adssice))
 
-#t = np.array([-1,-0.75,-0.5,0,0.3,0.5,1])
+
 #Â on affiche la courbe de la fonction cout pour visualiser si on minimise bien la fonction 
 # fonction cout
 def cout(A,x,b,lmbda):
@@ -115,10 +125,12 @@ def cout(A,x,b,lmbda):
 im_cout = []
 
 for x_k in x_k_liste: 
-    im_cout= np.append(im_cout,cout(A,x_k.reshape(100,1),b,lmbda))
-
-plt.plot(adssice,im_cout,label='moindre valeur absolue')
+    im_cout= np.append(im_cout,cout(A,x_k.reshape(n,1),b,lmbda))
+    
+print("temps ecoulé %f " %(time.time()-start_time))
+plt.plot(adssice,im_cout,label='Lasso')
 plt.legend()
-plt.title('fonction cout')
+plt.title('Exemple 3 : Evolution de la fonction cout en fonction du nombre d itération') 
 plt.grid(True)
 plt.show()
+
